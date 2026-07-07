@@ -353,36 +353,6 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
 .upload-zone-sub { font-size: 12px; color: var(--text-muted); }
 .upload-zone input[type=file] { display: none; }
 
-.planilha-divider {
-  display: flex; align-items: center; gap: 12px;
-  max-width: 520px; margin: 0 auto 24px; color: var(--text-muted); font-size: 12px;
-}
-.planilha-divider::before, .planilha-divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-.google-sheet-box {
-  max-width: 520px; margin: 0 auto 40px;
-  border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 24px; background: var(--surface);
-}
-.google-sheet-box-title {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;
-}
-.google-sheet-box-title i { color: var(--accent); font-size: 18px; }
-.google-sheet-box-sub { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
-.google-sheet-input-row { display: flex; gap: 8px; }
-.google-sheet-input-row input { flex: 1; }
-.google-sheet-error {
-  margin-top: 10px; font-size: 12px; color: var(--red);
-  background: var(--red-bg); border-radius: 6px; padding: 8px 10px; line-height: 1.5;
-}
-.planilha-google-status {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12px; color: var(--text-muted); margin-right: 4px;
-}
-.planilha-google-status i { color: var(--accent); font-size: 15px; }
-
 .planilha-meta {
   padding: 10px 20px; background: var(--surface2);
   border-bottom: 1px solid var(--border);
@@ -512,7 +482,7 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
             <span class="section-count" id="det-count-badge">30 registros</span>
             <div class="section-actions">
               <button class="btn btn-primary" onclick="exportXlsx('det')">
-                <i class="ti ti-file-spreadsheet"></i> Exportar Excel
+                <i class="ti ti-file-spreadsheet"></i> Exportar Planilha
               </button>
             </div>
           </div>
@@ -562,7 +532,7 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
             <span class="section-count" id="rec-count-badge">15 registros</span>
             <div class="section-actions">
               <button class="btn btn-primary" onclick="exportXlsx('rec')">
-                <i class="ti ti-file-spreadsheet"></i> Exportar Excel
+                <i class="ti ti-file-spreadsheet"></i> Exportar Planilha
               </button>
             </div>
           </div>
@@ -611,7 +581,7 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
             <span class="section-count" id="pend-count-badge">— registros</span>
             <div class="section-actions">
               <button class="btn btn-primary" onclick="exportXlsx('pend')">
-                <i class="ti ti-file-spreadsheet"></i> Exportar Excel
+                <i class="ti ti-file-spreadsheet"></i> Exportar Planilha
               </button>
             </div>
           </div>
@@ -648,20 +618,11 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
             <span class="section-title">Acompanhamento Via Planilha</span>
             <span class="section-count" id="planilha-count-badge" style="display:none">0 registros</span>
             <div class="section-actions" id="planilha-header-actions" style="display:none">
-              <span id="planilha-google-status" class="planilha-google-status" style="display:none">
-                <i class="ti ti-brand-google-filled"></i> <span id="planilha-google-status-text"></span>
-              </span>
-              <button class="btn btn-outline" id="planilha-btn-atualizar" style="display:none" onclick="refreshGoogleSheet()">
-                <i class="ti ti-refresh"></i> Atualizar agora
-              </button>
-              <button class="btn btn-outline" id="planilha-btn-alterar-link" style="display:none" onclick="showTrocarGoogleSheetForm()">
-                <i class="ti ti-link"></i> Alterar link
-              </button>
-              <button class="btn btn-outline" id="planilha-btn-trocar" style="display:none" onclick="document.getElementById('planilha-file-input-2').click()">
+              <button class="btn btn-outline" onclick="document.getElementById('planilha-file-input-2').click()">
                 <i class="ti ti-replace"></i> Trocar planilha
               </button>
               <button class="btn btn-primary" onclick="exportPlanilha()">
-                <i class="ti ti-file-spreadsheet"></i> Exportar Excel
+                <i class="ti ti-file-spreadsheet"></i> Exportar Planilha
               </button>
               <input type="file" id="planilha-file-input-2" accept=".xlsx,.xls" style="display:none" onchange="handlePlanilhaFile(this.files[0])">
             </div>
@@ -674,27 +635,6 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
               <div class="upload-zone-title">Envie sua planilha Excel</div>
               <div class="upload-zone-sub">Clique aqui ou arraste o arquivo (.xlsx / .xls)</div>
               <input type="file" id="planilha-file-input" accept=".xlsx,.xls" onchange="handlePlanilhaFile(this.files[0])">
-            </div>
-
-            <div class="planilha-divider"><span>ou</span></div>
-
-            <div class="google-sheet-box">
-              <div class="google-sheet-box-title"><i class="ti ti-brand-google-filled"></i> Conectar com Google Sheets</div>
-              <div class="google-sheet-box-sub">
-                Cole o link da planilha do Google Sheets. Ela precisa ter o acesso configurado como
-                "Qualquer pessoa com o link pode visualizar" (Compartilhar → Acesso geral). Se mesmo
-                assim o painel não conseguir ler os dados, publique a planilha na web
-                (Arquivo → Compartilhar → Publicar na Web → CSV) e cole o link gerado.
-              </div>
-              <div class="google-sheet-input-row">
-                <input type="text" id="google-sheet-url-input" class="search-input" style="padding-left:12px"
-                       value="https://docs.google.com/spreadsheets/d/1AwI2sEI65W1wpITnFeZ6vS4bgE6Wft4U7D3Rd5AO7Rg/edit?usp=sharing"
-                       placeholder="https://docs.google.com/spreadsheets/d/....">
-                <button class="btn btn-primary" onclick="connectGoogleSheet()">
-                  <i class="ti ti-plug-connected"></i> Conectar
-                </button>
-              </div>
-              <div class="google-sheet-error" id="google-sheet-error" style="display:none"></div>
             </div>
           </div>
 
@@ -1178,11 +1118,6 @@ function exportXlsx(key) {
 // ── CONFIGURAÇÃO ──
 const PLANILHA_CONFIG = {
   STORAGE_KEY: 'sisfisc_planilha_data',
-  // Link da planilha oficial do Google Sheets. Como ela está definida aqui,
-  // qualquer pessoa que abrir o painel já vê os dados automaticamente,
-  // sem precisar colar o link manualmente.
-  // Para trocar a planilha oficial, basta editar esta URL.
-  DEFAULT_GOOGLE_SHEET_URL: 'https://docs.google.com/spreadsheets/d/1AwI2sEI65W1wpITnFeZ6vS4bgE6Wft4U7D3Rd5AO7Rg/edit?usp=sharing',
   // Nomes de coluna (como aparecem na planilha) usados pelos filtros.
   // A busca é feita ignorando acentos/maiúsculas, então pequenas
   // variações de grafia no arquivo do usuário ainda funcionam.
@@ -1190,7 +1125,7 @@ const PLANILHA_CONFIG = {
   COL_NUM_PI: 'Nº do PI',
 };
 
-let PLANILHA_STATE = { headers: [], rows: [], filename: null, savedAt: null, source: null, sourceUrl: null };
+let PLANILHA_STATE = { headers: [], rows: [], filename: null, savedAt: null };
 let PLANILHA_PI_FILTER_ACTIVE = false;
 
 function normalizeHeaderKey(s) {
@@ -1219,14 +1154,11 @@ function handlePlanilhaFile(file) {
         ? Object.keys(rows[0])
         : (XLSX.utils.sheet_to_json(sheet, { header: 1 })[0] || []);
 
-      stopGoogleSheetAutoRefresh();
       PLANILHA_STATE = {
         headers,
         rows,
         filename: file.name,
         savedAt: new Date().toISOString(),
-        source: 'file',
-        sourceUrl: null,
       };
       PLANILHA_PI_FILTER_ACTIVE = false;
       savePlanilhaToStorage();
@@ -1278,13 +1210,9 @@ function loadPlanilhaFromStorage() {
 }
 
 function clearPlanilha() {
-  const msg = PLANILHA_STATE.source === 'google'
-    ? 'Desconectar a planilha do Google Sheets? Você precisará colar o link novamente.'
-    : 'Remover a planilha carregada? Você precisará enviar o arquivo novamente.';
-  if (!confirm(msg)) return;
+  if (!confirm('Remover a planilha carregada? Você precisará enviar o arquivo novamente.')) return;
   localStorage.removeItem(PLANILHA_CONFIG.STORAGE_KEY);
-  stopGoogleSheetAutoRefresh();
-  PLANILHA_STATE = { headers: [], rows: [], filename: null, savedAt: null, source: null, sourceUrl: null };
+  PLANILHA_STATE = { headers: [], rows: [], filename: null, savedAt: null };
   PLANILHA_PI_FILTER_ACTIVE = false;
   renderPlanilhaPanel();
 }
@@ -1298,16 +1226,6 @@ function renderPlanilhaPanel() {
   document.getElementById('planilha-count-badge').style.display = hasData ? 'inline-block' : 'none';
   document.getElementById('nb-planilha').textContent = hasData ? PLANILHA_STATE.rows.length : '—';
 
-  const isGoogle = hasData && PLANILHA_STATE.source === 'google';
-  document.getElementById('planilha-btn-atualizar').style.display = isGoogle ? 'inline-flex' : 'none';
-  document.getElementById('planilha-btn-alterar-link').style.display = isGoogle ? 'inline-flex' : 'none';
-  document.getElementById('planilha-btn-trocar').style.display = (hasData && !isGoogle) ? 'inline-flex' : 'none';
-  document.getElementById('planilha-google-status').style.display = isGoogle ? 'inline-flex' : 'none';
-  if (isGoogle) {
-    document.getElementById('planilha-google-status-text').textContent =
-      'Sincroniza a cada ' + Math.round(GOOGLE_SHEET_AUTO_REFRESH_MS / 60000) + ' min';
-  }
-
   if (!hasData) return;
 
   document.getElementById('planilha-filename').textContent = PLANILHA_STATE.filename || '—';
@@ -1317,188 +1235,6 @@ function renderPlanilhaPanel() {
 
   populatePlanilhaAnoFilter();
   renderPlanilhaTable();
-
-  if (isGoogle) startGoogleSheetAutoRefresh();
-}
-
-/* ── GOOGLE SHEETS ── */
-// Intervalo de sincronização automática quando a fonte é o Google Sheets
-const GOOGLE_SHEET_AUTO_REFRESH_MS = 5 * 60 * 1000;
-let _googleSheetAutoRefreshTimer = null;
-
-// Extrai o ID e o gid (aba) a partir de um link colado do Google Sheets.
-// Aceita links do tipo:
-//   .../spreadsheets/d/ID/edit#gid=123
-//   .../spreadsheets/d/ID/edit?usp=sharing
-function parseGoogleSheetUrl(url) {
-  const idMatch = String(url || '').match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-  if (!idMatch) return null;
-  const gidMatch = String(url).match(/[?#&]gid=(\d+)/);
-  return { id: idMatch[1], gid: gidMatch ? gidMatch[1] : '0' };
-}
-
-// Detecta um link gerado por "Arquivo → Compartilhar → Publicar na Web"
-// (formato .../spreadsheets/d/e/CHAVE/pubhtml ou /pub?output=csv).
-// Esse tipo de link é público por natureza e não sofre bloqueio de CORS.
-function parsePublishedSheetUrl(url) {
-  const match = String(url || '').match(/spreadsheets\/d\/e\/([a-zA-Z0-9-_]+)/);
-  if (!match) return null;
-  const gidMatch = String(url).match(/[?#&]gid=(\d+)/);
-  return { key: match[1], gid: gidMatch ? gidMatch[1] : null };
-}
-
-function buildPublishedCsvUrl({ key, gid }) {
-  let out = `https://docs.google.com/spreadsheets/d/e/${key}/pub?output=csv`;
-  if (gid) out += `&gid=${gid}&single=true`;
-  return out;
-}
-
-// Monta as URLs candidatas para ler a planilha publicamente.
-// O endpoint "gviz/tq" é o mais confiável para leitura anônima via
-// JavaScript (usado pela própria Google Visualization API). O "export"
-// funciona em alguns casos, mas às vezes exige sessão logada mesmo com
-// o link público. Por isso tentamos os dois, nessa ordem.
-function buildGoogleSheetUrls({ id, gid }) {
-  return [
-    `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${gid}`,
-    `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`,
-  ];
-}
-
-function showGoogleSheetError(msg) {
-  const el = document.getElementById('google-sheet-error');
-  if (!msg) { el.style.display = 'none'; el.textContent = ''; return; }
-  el.style.display = 'block';
-  el.textContent = msg;
-}
-
-async function tryFetchCsv(csvUrl) {
-  let res;
-  try {
-    res = await fetch(csvUrl);
-  } catch (err) {
-    // Erro de rede/CORS: o navegador nem chegou a receber uma resposta.
-    return { ok: false, reason: 'network' };
-  }
-  if (!res.ok) {
-    return { ok: false, reason: 'http', status: res.status };
-  }
-  const csvText = await res.text();
-  if (/^\s*<!DOCTYPE html/i.test(csvText) || /accounts\.google\.com/i.test(csvText)) {
-    return { ok: false, reason: 'login' };
-  }
-  return { ok: true, csvText };
-}
-
-async function fetchGoogleSheetRows(sheetUrl) {
-  const published = parsePublishedSheetUrl(sheetUrl);
-  const info = published ? null : parseGoogleSheetUrl(sheetUrl);
-  if (!published && !info) {
-    throw new Error('Link inválido. Copie o link completo da barra de endereço com a planilha aberta no navegador.');
-  }
-
-  const candidates = published ? [buildPublishedCsvUrl(published)] : buildGoogleSheetUrls(info);
-  let lastReason = null;
-  let csvText = null;
-
-  for (const url of candidates) {
-    const result = await tryFetchCsv(url);
-    if (result.ok) { csvText = result.csvText; break; }
-    lastReason = result.reason;
-  }
-
-  if (csvText === null) {
-    if (lastReason === 'login') {
-      throw new Error('A planilha exige login para ser acessada. Vá em Compartilhar → Acesso geral e defina "Qualquer pessoa com o link" como Leitor.');
-    }
-    if (lastReason === 'network') {
-      throw new Error('O navegador bloqueou o acesso à planilha (CORS). Tente publicar a planilha na web: Arquivo → Compartilhar → Publicar na Web → selecione a aba → formato CSV → Publicar, e cole aqui o link gerado.');
-    }
-    throw new Error('A planilha não está acessível publicamente. Confira se o acesso está como "Qualquer pessoa com o link pode visualizar" e se o link/aba (gid) está correto.');
-  }
-
-  const wb = XLSX.read(csvText, { type: 'string' });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
-  const headers = rows.length
-    ? Object.keys(rows[0])
-    : (XLSX.utils.sheet_to_json(sheet, { header: 1 })[0] || []);
-  return { headers, rows };
-}
-
-async function applyGoogleSheetUrl(url, { silent } = {}) {
-  const { headers, rows } = await fetchGoogleSheetRows(url);
-  PLANILHA_STATE = {
-    headers, rows,
-    filename: 'Google Sheets (sincronizado)',
-    savedAt: new Date().toISOString(),
-    source: 'google',
-    sourceUrl: url,
-  };
-  PLANILHA_PI_FILTER_ACTIVE = false;
-  savePlanilhaToStorage();
-  renderPlanilhaPanel();
-  return true;
-}
-
-async function connectGoogleSheet() {
-  const input = document.getElementById('google-sheet-url-input');
-  const url = input.value.trim();
-  showGoogleSheetError(null);
-  if (!url) { showGoogleSheetError('Cole o link da planilha antes de conectar.'); return; }
-
-  try {
-    await applyGoogleSheetUrl(url);
-  } catch (err) {
-    showGoogleSheetError(err.message);
-    console.error('[SisFisc][Planilha][GoogleSheets]', err);
-  }
-}
-
-// Conecta automaticamente na planilha oficial (PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL)
-// assim que o painel é carregado, sem exigir que o usuário cole o link.
-async function autoConnectDefaultGoogleSheet() {
-  const url = PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL;
-  if (!url) return;
-  document.getElementById('google-sheet-url-input').value = url;
-  try {
-    await applyGoogleSheetUrl(url, { silent: true });
-  } catch (err) {
-    // Falhou a conexão automática (ex: planilha ficou privada) — deixa a
-    // tela de upload/link visível para o usuário resolver manualmente.
-    console.error('[SisFisc][Planilha][GoogleSheets] Falha na conexão automática:', err);
-    showGoogleSheetError('Não foi possível carregar a planilha oficial automaticamente: ' + err.message);
-  }
-}
-
-// Permite trocar o link de uma planilha Google já conectada
-function showTrocarGoogleSheetForm() {
-  document.getElementById('planilha-content-container').style.display = 'none';
-  document.getElementById('planilha-upload-container').style.display = 'block';
-  document.getElementById('google-sheet-url-input').value = PLANILHA_STATE.sourceUrl || '';
-  showGoogleSheetError(null);
-}
-
-async function refreshGoogleSheet(silent) {
-  if (!PLANILHA_STATE.sourceUrl) return;
-  try {
-    const { headers, rows } = await fetchGoogleSheetRows(PLANILHA_STATE.sourceUrl);
-    PLANILHA_STATE = { ...PLANILHA_STATE, headers, rows, savedAt: new Date().toISOString() };
-    savePlanilhaToStorage();
-    renderPlanilhaPanel();
-  } catch (err) {
-    console.error('[SisFisc][Planilha][GoogleSheets] Falha ao atualizar:', err);
-    if (!silent) alert('Não foi possível atualizar a planilha agora: ' + err.message);
-  }
-}
-
-function startGoogleSheetAutoRefresh() {
-  if (_googleSheetAutoRefreshTimer) return;
-  _googleSheetAutoRefreshTimer = setInterval(() => refreshGoogleSheet(true), GOOGLE_SHEET_AUTO_REFRESH_MS);
-}
-
-function stopGoogleSheetAutoRefresh() {
-  if (_googleSheetAutoRefreshTimer) { clearInterval(_googleSheetAutoRefreshTimer); _googleSheetAutoRefreshTimer = null; }
 }
 
 /* ── FILTRO: Ano julgamento (dropdown) ── */
@@ -1589,13 +1325,11 @@ function exportPlanilha() {
 loadData();
 setInterval(() => loadData(), AUTO_REFRESH_MS);
 
-// Restaura a última planilha trabalhada, se existir; caso contrário,
-// conecta automaticamente na planilha oficial do Google Sheets.
-if (loadPlanilhaFromStorage() && PLANILHA_STATE.rows && PLANILHA_STATE.rows.length) {
+// Restaura a última planilha trabalhada, se existir
+if (loadPlanilhaFromStorage()) {
   renderPlanilhaPanel();
 } else {
   document.getElementById('nb-planilha').textContent = '—';
-  autoConnectDefaultGoogleSheet();
 }
 </script>
 </body>

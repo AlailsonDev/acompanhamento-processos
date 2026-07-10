@@ -62,8 +62,8 @@ html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif;
   align-items: center;
   text-align: center;
   gap: 12px;
-  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0));
-  /* background-color: #e8f1fb; */
+  /* background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0)); */
+  background-color: #e8f1fb;
 }
 .brand-icon {
   width: 40px; height: 40px;
@@ -416,30 +416,18 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
   width: 100%;
   max-width: 132px;
   height: auto;
-  background-color: #fff;
+  /* background-color: #fff; */
   border-radius: 12px;
   padding: 10px 14px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.28);
-}
-
-.logo-pjg {
-  display: block;
-  width: 100%;
-  max-width: 150px;
-  height: auto;
-  margin: 0 auto;
-  background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0,0,0,.28);
-  border-radius: 12px;
-
+  /* box-shadow: 0 2px 10px rgba(0,0,0,.28); */
 }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .sidebar { width: 56px; min-width: 56px; }
   .sidebar-brand { padding: 14px 8px; gap: 0; }
-  .logo-cgm { max-width: 36px; padding: 4px; border-radius: 8px; }
-  .logo-pjg, .brand-name, .brand-sub, .sidebar-section-label, .nav-item span, .nav-badge, .sidebar-footer { display: none; }
+  .logo-cgm { max-width: 36px; padding: 4px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.28); }
+  .brand-name, .brand-sub, .sidebar-section-label, .nav-item span, .nav-badge, .sidebar-footer { display: none; }
   .nav-item { justify-content: center; }
   .topbar { padding: 0 16px; gap: 8px; }
   .content-area { padding: 18px; }
@@ -485,7 +473,7 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
     <div class="sidebar-brand">
       <!-- <div class="brand-icon"><i class="ti ti-scale"></i></div> -->
        <img src="./assets/CGM.png" alt="Logo CGM" class="logo-cgm">
-       <img src="./assets/logo-horizontal (1).png" alt="Logo PJG" class="logo-pjg">
+       <img src="./assets/logo-horizontal (1).png" alt="logo-pjg">    
       <!-- <div class="brand-name">SisFisc</div> -->
       <div class="brand-sub">Acompanhamento de Processos</div>
     </div>

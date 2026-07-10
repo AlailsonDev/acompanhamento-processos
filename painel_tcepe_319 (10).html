@@ -53,6 +53,8 @@ html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif;
   flex-direction: column;
   overflow-y: auto;
   z-index: 50;
+  /* background-color: white;  */
+
 }
 .sidebar-brand {
   padding: 22px 20px 18px;
@@ -63,6 +65,8 @@ html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif;
   text-align: center;
   gap: 12px;
   background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0));
+
+
 }
 .brand-icon {
   width: 40px; height: 40px;
@@ -428,29 +432,16 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
   .logo-cgm { max-width: 36px; padding: 4px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.28); }
   .brand-name, .brand-sub, .sidebar-section-label, .nav-item span, .nav-badge, .sidebar-footer { display: none; }
   .nav-item { justify-content: center; }
-  .topbar { padding: 0 16px; gap: 8px; }
-  .content-area { padding: 18px; }
-  .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .charts-grid { grid-template-columns: 1fr; }
+  .kpi-row { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 480px) {
-  .sidebar { width: 48px; min-width: 48px; }
-  .sidebar-brand { padding: 10px 4px; }
-  .logo-cgm { max-width: 28px; padding: 3px; border-radius: 6px; }
-  .nav-item { padding: 9px 6px; }
-  .nav-item i { font-size: 17px; min-width: 0; }
-  .topbar { padding: 0 10px; gap: 6px; }
-  .topbar-crumb { font-size: 11px; }
-  .topbar-pill span { display: none; }
-  .content-area { padding: 12px; }
-  .kpi-row { grid-template-columns: 1fr; gap: 8px; }
-  .kpi-card { padding: 14px 16px; }
-  .kpi-val { font-size: 24px; }
-  .section-header { padding: 12px 14px; }
-  .toolbar { padding: 10px 14px; }
-  .search-wrap { min-width: 100%; flex: 1 1 100%; }
-  .filter-select { flex: 1 1 100%; }
+  .app { flex-direction: column; height: auto; min-height: 100vh; }
+  .sidebar { width: 100%; min-width: 0; flex-direction: row; flex-wrap: wrap; overflow-y: visible; }
+  .sidebar-brand { flex-direction: row; width: 100%; padding: 10px 14px; gap: 10px; text-align: left; align-items: center; }
+  .logo-cgm { max-width: 60px; }
+  .brand-name, .brand-sub { display: block; }
+  .sidebar-footer { display: none; }
 }
 </style>
 </head>

@@ -16,10 +16,10 @@
   --navy-hover: #162F55;
   --accent: #1B6FBF;
   --accent-light: #E8F1FB;
-  --bg: #EDF1F7;
+  --bg: #EEF1F6;
   --surface: #FFFFFF;
-  --surface2: #F7F9FC;
-  --border: #DCE2EB;
+  --surface2: #F7F8FA;
+  --border: #DDE2EA;
   --text-primary: #111827;
   --text-secondary: #5A6473;
   --text-muted: #9AA3AF;
@@ -55,14 +55,9 @@ html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif;
   z-index: 50;
 }
 .sidebar-brand {
-  padding: 22px 20px 18px;
+  padding: 20px 20px 16px;
   border-bottom: 1px solid rgba(255,255,255,.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 12px;
-  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0));
+
 }
 .brand-icon {
   width: 40px; height: 40px;
@@ -73,7 +68,7 @@ html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif;
   font-size: 20px; color: #fff;
 }
 .brand-name { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: .02em; }
-.brand-sub  { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 0; line-height: 1.4; }
+.brand-sub  { font-size: 11px; color: rgba(255,255,255,.45); margin-top: 2px; }
 
 .sidebar-section { padding: 16px 12px 8px; }
 .sidebar-section-label {
@@ -411,33 +406,16 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
 .filter-toggle:hover { border-color: var(--accent); }
 
 .logo-cgm {
-  display: block;
-  width: 100%;
-  max-width: 132px;
-  height: auto;
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 10px 14px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.28);
+  width: 10rem;
+  background-color: white;
 }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .sidebar { width: 56px; min-width: 56px; }
-  .sidebar-brand { padding: 14px 8px; gap: 0; }
-  .logo-cgm { max-width: 36px; padding: 4px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.28); }
   .brand-name, .brand-sub, .sidebar-section-label, .nav-item span, .nav-badge, .sidebar-footer { display: none; }
   .nav-item { justify-content: center; }
   .kpi-row { grid-template-columns: 1fr 1fr; }
-}
-
-@media (max-width: 480px) {
-  .app { flex-direction: column; height: auto; min-height: 100vh; }
-  .sidebar { width: 100%; min-width: 0; flex-direction: row; flex-wrap: wrap; overflow-y: visible; }
-  .sidebar-brand { flex-direction: row; width: 100%; padding: 10px 14px; gap: 10px; text-align: left; align-items: center; }
-  .logo-cgm { max-width: 60px; }
-  .brand-name, .brand-sub { display: block; }
-  .sidebar-footer { display: none; }
 }
 </style>
 </head>

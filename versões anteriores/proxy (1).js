@@ -67,26 +67,6 @@ function isFresh(entry) {
 // ── PARSER HTML → JSON ────────────────────────────────────────
 // A API do TCEPE devolve HTML com uma <table>. Esta função
 // transforma as linhas da tabela em um array de objetos JSON.
-function decodeHtmlEntities(str) {
-  return str
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-}
-
-// A API do TCEPE devolve os links de Processo/Documento como células cujo
-// conteúdo é <a href="javascript:abrirURL('http://etce.tcepe.tc.br/...')">Abrir</a>.
-// Extrai a URL real de dentro da chamada abrirURL(...) antes de descartar as tags,
-// senão o link se perde e sobra apenas o texto "Abrir".
-function extractAbrirURLLink(rawCellHtml) {
-  const match = rawCellHtml.match(/abrirURL\(\s*(?:&quot;|&#39;|"|')([\s\S]*?)(?:&quot;|&#39;|"|')\s*\)/i);
-  if (!match) return null;
-  return decodeHtmlEntities(match[1]).trim();
-}
-
 function parseTableHTML(html) {
   const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
   const cellRegex = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi;
@@ -101,13 +81,16 @@ function parseTableHTML(html) {
     const cells = [];
     let cellMatch;
     while ((cellMatch = cellRegex.exec(rowContent)) !== null) {
-      const rawCell = cellMatch[1];
-      const link = extractAbrirURLLink(rawCell);
-      const text = link !== null
-        ? link
-        : decodeHtmlEntities(
-            rawCell.replace(/<[^>]+>/g, ' ')
-          ).replace(/\s+/g, ' ').trim();
+      const text = cellMatch[1]
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
       cells.push(text);
     }
 

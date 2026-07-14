@@ -12,9 +12,6 @@
     if (theme === 'dark' || (!theme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark-theme');
     }
-    if (localStorage.getItem('painel319_highcontrast') === '1') {
-      document.documentElement.classList.add('high-contrast');
-    }
     var scale = localStorage.getItem('painel319_fontscale');
     if (scale) {
       document.documentElement.style.zoom = (parseInt(scale, 10) / 100);
@@ -88,56 +85,6 @@ html.dark-theme .badge-det { background: #3A1830; color: #F9A8D4; }
 html.dark-theme .badge-rec { background: #113A22; color: #6EE7A8; }
 html.dark-theme .logo-cgm,
 html.dark-theme .logo-pjg { background-color: #fff; }
-
-/* ── ALTO CONTRASTE ── */
-/* Paleta preto/branco/amarelo com contraste elevado (WCAG AAA), independente do modo claro/escuro */
-html.high-contrast {
-  --navy: #000000;
-  --navy-light: #000000;
-  --navy-hover: #1A1A1A;
-  --accent: #FFD400;
-  --accent-light: #000000;
-  --bg: #000000;
-  --surface: #000000;
-  --surface2: #0D0D0D;
-  --border: #FFFFFF;
-  --text-primary: #FFFFFF;
-  --text-secondary: #FFFFFF;
-  --text-muted: #FFD400;
-  --green: #00FF66;
-  --green-bg: #001A0A;
-  --blue: #66CCFF;
-  --blue-bg: #001A26;
-  --amber: #FFD400;
-  --amber-bg: #262000;
-  --red: #FF6B6B;
-  --red-bg: #260000;
-  --purple: #D9A6FF;
-  --purple-bg: #1A0026;
-  --shadow: none;
-  --shadow-md: none;
-}
-html.high-contrast .badge-det { background: #260018; color: #FF8AD4; border: 1px solid #FF8AD4; }
-html.high-contrast .badge-rec { background: #002611; color: #6EE7A8; border: 1px solid #6EE7A8; }
-html.high-contrast .logo-cgm,
-html.high-contrast .logo-pjg { background-color: #fff; }
-html.high-contrast * { text-shadow: none !important; }
-html.high-contrast .card,
-html.high-contrast .kpi-card,
-html.high-contrast .section,
-html.high-contrast table,
-html.high-contrast th,
-html.high-contrast td,
-html.high-contrast input,
-html.high-contrast select,
-html.high-contrast .a11y-group,
-html.high-contrast .theme-toggle,
-html.high-contrast .a11y-btn,
-html.high-contrast .btn { border-color: var(--border) !important; }
-html.high-contrast a:focus-visible,
-html.high-contrast button:focus-visible,
-html.high-contrast input:focus-visible,
-html.high-contrast select:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); font-size: 14px; transition: background-color .2s ease, color .2s ease; }
@@ -267,8 +214,6 @@ html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif;
   cursor: pointer; font-size: 15px; transition: all .15s;
 }
 .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
-.theme-toggle.active { background: var(--accent); border-color: var(--accent); color: #000; }
-.theme-toggle.active:hover { color: #000; }
 
 .content-area {
   flex: 1; min-width: 0; overflow-y: auto; overflow-x: hidden; padding: 24px;
@@ -574,7 +519,6 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
   .nav-item { justify-content: center; }
   .topbar { padding: 0 16px; gap: 8px; }
   .topbar-pill { display: none; }
-  .a11y-group { display: none; }
   .content-area { padding: 18px; }
   .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; }
   .charts-grid { grid-template-columns: 1fr; }
@@ -694,10 +638,6 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
 
         <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar modo escuro/claro" aria-label="Alternar modo escuro/claro">
           <i class="ti ti-moon" id="theme-toggle-icon"></i>
-        </button>
-
-        <button class="theme-toggle" id="contrast-toggle-btn" onclick="toggleHighContrast()" title="Ativar alto contraste" aria-label="Ativar alto contraste" aria-pressed="false">
-          <i class="ti ti-contrast" id="contrast-toggle-icon"></i>
         </button>
 
         <button class="btn btn-outline" onclick="loadData()" style="gap:5px" title="Recarregar dados do TCEPE">
@@ -1822,32 +1762,6 @@ function initTheme() {
   applyThemeIcon();
 }
 
-/* ── ACESSIBILIDADE — ALTO CONTRASTE ── */
-const HIGH_CONTRAST_KEY = 'painel319_highcontrast';
-
-function applyHighContrastState() {
-  const active = document.documentElement.classList.contains('high-contrast');
-  const btn = document.getElementById('contrast-toggle-btn');
-  if (btn) {
-    btn.classList.toggle('active', active);
-    btn.title = active ? 'Desativar alto contraste' : 'Ativar alto contraste';
-    btn.setAttribute('aria-label', btn.title);
-    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-  }
-}
-
-function toggleHighContrast() {
-  const html = document.documentElement;
-  const active = html.classList.toggle('high-contrast');
-  try { localStorage.setItem(HIGH_CONTRAST_KEY, active ? '1' : '0'); } catch (e) {}
-  applyHighContrastState();
-}
-
-function initHighContrast() {
-  // A classe já foi aplicada no <head> (evita flash); aqui só sincronizamos o botão.
-  applyHighContrastState();
-}
-
 /* ── ACESSIBILIDADE — TAMANHO DA FONTE ── */
 const FONT_SCALE_KEY = 'painel319_fontscale';
 const FONT_SCALE_MIN = 80;
@@ -1889,7 +1803,6 @@ function initFontSize() {
 }
 
 initTheme();
-initHighContrast();
 initFontSize();
 
 /* ── INIT ── */

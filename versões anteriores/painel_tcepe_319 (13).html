@@ -4,21 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title> · CGM — Jaboatão dos Guararapes</title>
-<script>
-// Aplica tema e tamanho de fonte salvos ANTES da renderização, evitando "flash" de tela clara/tamanho errado.
-(function () {
-  try {
-    var theme = localStorage.getItem('painel319_theme');
-    if (theme === 'dark' || (!theme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark-theme');
-    }
-    var scale = localStorage.getItem('painel319_fontscale');
-    if (scale) {
-      document.documentElement.style.zoom = (parseInt(scale, 10) / 100);
-    }
-  } catch (e) {}
-})();
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
@@ -53,41 +38,8 @@
   --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
   --shadow-md: 0 4px 12px rgba(0,0,0,.08);
 }
-
-/* ── DARK MODE ── */
-html.dark-theme {
-  --navy: #0B1E36;
-  --navy-light: #14304F;
-  --navy-hover: #10263F;
-  --accent: #4DA3F5;
-  --accent-light: #16324F;
-  --bg: #0E1520;
-  --surface: #161F2E;
-  --surface2: #1B2536;
-  --border: #2A3648;
-  --text-primary: #E8EDF4;
-  --text-secondary: #9AA6B8;
-  --text-muted: #6B7688;
-  --green: #4ADE80;
-  --green-bg: #123422;
-  --blue: #5BA6F0;
-  --blue-bg: #10263F;
-  --amber: #F5B255;
-  --amber-bg: #3A2A0E;
-  --red: #F87171;
-  --red-bg: #3A1414;
-  --purple: #B39DF0;
-  --purple-bg: #2A1F45;
-  --shadow: 0 1px 3px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.3);
-  --shadow-md: 0 4px 14px rgba(0,0,0,.45);
-}
-html.dark-theme .badge-det { background: #3A1830; color: #F9A8D4; }
-html.dark-theme .badge-rec { background: #113A22; color: #6EE7A8; }
-html.dark-theme .logo-cgm,
-html.dark-theme .logo-pjg { background-color: #fff; }
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); font-size: 14px; transition: background-color .2s ease, color .2s ease; }
+html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); font-size: 14px; }
 
 /* ── LAYOUT ── */
 .app { display: flex; height: 100vh; overflow: hidden; }
@@ -186,34 +138,6 @@ html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif;
   padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
 }
 .topbar-pill i { font-size: 14px; }
-
-/* ── CONTROLES DE ACESSIBILIDADE / TEMA ── */
-.a11y-group {
-  display: flex; align-items: center; gap: 2px;
-  border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 2px; background: var(--surface2);
-}
-.a11y-btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 28px; height: 26px; border-radius: 6px;
-  border: none; background: transparent; color: var(--text-secondary);
-  cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s;
-}
-.a11y-btn:hover { background: var(--accent-light); color: var(--accent); }
-.a11y-btn:disabled { opacity: .35; cursor: not-allowed; }
-.a11y-btn:disabled:hover { background: transparent; color: var(--text-secondary); }
-.a11y-btn i { font-size: 15px; }
-.a11y-label {
-  font-size: 10px; font-weight: 600; color: var(--text-muted);
-  min-width: 30px; text-align: center; user-select: none;
-}
-.theme-toggle {
-  display: flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px; border-radius: var(--radius);
-  border: 1px solid var(--border); background: var(--surface2); color: var(--text-secondary);
-  cursor: pointer; font-size: 15px; transition: all .15s;
-}
-.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
 .content-area {
   flex: 1; min-width: 0; overflow-y: auto; overflow-x: hidden; padding: 24px;
@@ -518,7 +442,6 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
   .logo-pjg, .brand-name, .brand-sub, .sidebar-section-label, .nav-item span, .nav-badge, .sidebar-footer { display: none; }
   .nav-item { justify-content: center; }
   .topbar { padding: 0 16px; gap: 8px; }
-  .topbar-pill { display: none; }
   .content-area { padding: 18px; }
   .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; }
   .charts-grid { grid-template-columns: 1fr; }
@@ -532,9 +455,7 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
   .nav-item i { font-size: 17px; min-width: 0; }
   .topbar { padding: 0 10px; gap: 6px; }
   .topbar-crumb { font-size: 11px; }
-  .a11y-label { display: none; }
-  .a11y-btn { width: 24px; }
-  #font-reset { display: none; }
+  .topbar-pill span { display: none; }
   .content-area { padding: 12px; }
   .kpi-row { grid-template-columns: 1fr; gap: 8px; }
   .kpi-card { padding: 14px 16px; }
@@ -622,24 +543,6 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
       <span class="topbar-crumb"><span class="topbar-sep">/</span> <span id="topbar-title">Visão Geral</span></span>
       <div class="topbar-actions">
         <span id="last-fetched" style="display:none;font-size:11px;color:var(--text-muted)"></span>
-
-        <div class="a11y-group" role="group" aria-label="Ajustar tamanho da fonte">
-          <button class="a11y-btn" id="font-decrease" onclick="changeFontSize(-10)" title="Diminuir tamanho da fonte" aria-label="Diminuir tamanho da fonte">
-            <i class="ti ti-minus"></i>
-          </button>
-          <span class="a11y-label" id="font-scale-label">100%</span>
-          <button class="a11y-btn" id="font-increase" onclick="changeFontSize(10)" title="Aumentar tamanho da fonte" aria-label="Aumentar tamanho da fonte">
-            <i class="ti ti-plus"></i>
-          </button>
-          <button class="a11y-btn" id="font-reset" onclick="resetFontSize()" title="Restaurar tamanho padrão da fonte" aria-label="Restaurar tamanho padrão da fonte">
-            <i class="ti ti-refresh"></i>
-          </button>
-        </div>
-
-        <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar modo escuro/claro" aria-label="Alternar modo escuro/claro">
-          <i class="ti ti-moon" id="theme-toggle-icon"></i>
-        </button>
-
         <button class="btn btn-outline" onclick="loadData()" style="gap:5px" title="Recarregar dados do TCEPE">
           <i class="ti ti-refresh" style="font-size:15px"></i> Atualizar
         </button>
@@ -1738,72 +1641,6 @@ function exportPlanilha() {
   XLSX.utils.book_append_sheet(wb, ws, 'Acompanhamento');
   XLSX.writeFile(wb, 'acompanhamento_planilha_319.xlsx');
 }
-
-/* ── TEMA (MODO ESCURO) ── */
-const THEME_KEY = 'painel319_theme';
-
-function applyThemeIcon() {
-  const isDark = document.documentElement.classList.contains('dark-theme');
-  const icon = document.getElementById('theme-toggle-icon');
-  if (icon) icon.className = isDark ? 'ti ti-sun' : 'ti ti-moon';
-  const btn = document.getElementById('theme-toggle-btn');
-  if (btn) btn.title = isDark ? 'Alternar para modo claro' : 'Alternar para modo escuro';
-}
-
-function toggleTheme() {
-  const html = document.documentElement;
-  const isDark = html.classList.toggle('dark-theme');
-  try { localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light'); } catch (e) {}
-  applyThemeIcon();
-}
-
-function initTheme() {
-  // O tema já foi aplicado no <head> (evita flash); aqui só sincronizamos o ícone.
-  applyThemeIcon();
-}
-
-/* ── ACESSIBILIDADE — TAMANHO DA FONTE ── */
-const FONT_SCALE_KEY = 'painel319_fontscale';
-const FONT_SCALE_MIN = 80;
-const FONT_SCALE_MAX = 160;
-const FONT_SCALE_STEP = 10;
-
-function getCurrentFontScale() {
-  try {
-    const stored = localStorage.getItem(FONT_SCALE_KEY);
-    if (stored) return parseInt(stored, 10);
-  } catch (e) {}
-  return 100;
-}
-
-function applyFontScale(scale) {
-  document.documentElement.style.zoom = scale / 100;
-  const label = document.getElementById('font-scale-label');
-  if (label) label.textContent = scale + '%';
-  const decBtn = document.getElementById('font-decrease');
-  const incBtn = document.getElementById('font-increase');
-  if (decBtn) decBtn.disabled = scale <= FONT_SCALE_MIN;
-  if (incBtn) incBtn.disabled = scale >= FONT_SCALE_MAX;
-}
-
-function changeFontSize(delta) {
-  let scale = getCurrentFontScale() + delta;
-  scale = Math.max(FONT_SCALE_MIN, Math.min(FONT_SCALE_MAX, scale));
-  try { localStorage.setItem(FONT_SCALE_KEY, scale); } catch (e) {}
-  applyFontScale(scale);
-}
-
-function resetFontSize() {
-  try { localStorage.setItem(FONT_SCALE_KEY, 100); } catch (e) {}
-  applyFontScale(100);
-}
-
-function initFontSize() {
-  applyFontScale(getCurrentFontScale());
-}
-
-initTheme();
-initFontSize();
 
 /* ── INIT ── */
 // Tenta carregar do proxy; se falhar mostra erro no banner

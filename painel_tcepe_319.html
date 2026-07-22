@@ -695,10 +695,26 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
       </button>
     </div>
 
-    <div class="sidebar-footer">
+    <!-- <div class="sidebar-footer">
       UJ 319 · Jaboatão dos Guararapes<br>
       Fonte: TCEPE · jun/2026
-    </div>
+    </div> -->
+    <div class="sidebar-footer">
+  UJ 319 · Jaboatão dos Guararapes<br>
+  Fonte: TCEPE · <span id="mesAtual"></span>
+</div>
+
+<script>
+  const agora = new Date();
+
+  const mes = agora.toLocaleString('pt-BR', {
+    month: 'short'
+  }).replace('.', '');
+
+  const ano = agora.getFullYear();
+
+  document.getElementById('mesAtual').textContent = `${mes}/${ano}`;
+</script>
   </aside>
 
   <!-- MAIN -->

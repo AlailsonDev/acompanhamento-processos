@@ -1440,7 +1440,7 @@ function openPrazoEditor(uid, proc, currentValue) {
   if (!host) return;
   host.outerHTML = `<div class="prazo-cell prazo-editing" id="prazo-view-${uid}">
     <input type="text" class="prazo-input" id="prazo-input-${uid}"
-      value="${escapeHtml(currentValue)}" placeholder="Ex.: 30 dias, até 15/08"
+      value="${escapeHtml(currentValue)}" placeholder="Ex.: 30 dias"
       maxlength="120" />
     <button type="button" class="prazo-save-btn" title="Salvar" onclick="savePrazoEdit('${uid}')">
       <i class="ti ti-check"></i>

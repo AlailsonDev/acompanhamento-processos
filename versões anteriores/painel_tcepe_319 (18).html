@@ -408,6 +408,10 @@ tbody td { padding: 11px 14px; vertical-align: top; }
 .badge-det    { background: #FEE7EF; color: #9D174D; }
 .badge-rec    { background: #DCFCE7; color: #15803D; }
 .badge-prazo  { background: var(--red-bg); color: var(--red); font-weight: 700; }
+.badge-status-success { background: var(--green-bg); color: var(--green); }
+.badge-status-warning { background: var(--amber-bg); color: var(--amber); }
+.badge-status-danger  { background: var(--red-bg); color: var(--red); }
+.badge-status-neutral { background: var(--bg); color: var(--text-secondary); }
 
 /* ── PRAZO EDITÁVEL (TEXTO LIVRE) ── */
 .prazo-cell { display: inline-flex; align-items: center; gap: 6px; }
@@ -550,14 +554,6 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
   font-size: 12px; color: var(--text-muted); margin-right: 4px;
 }
 .planilha-google-status i { color: var(--accent); font-size: 15px; }
-
-.planilha-missing-warning {
-  display: flex; align-items: center; gap: 8px;
-  margin: 0 20px 14px; padding: 10px 14px;
-  background: var(--amber-bg); color: var(--amber);
-  border-radius: var(--radius-md, 8px); font-size: 12px; line-height: 1.5;
-}
-.planilha-missing-warning i { font-size: 16px; flex-shrink: 0; }
 
 .planilha-meta {
   padding: 10px 20px; background: var(--surface2);
@@ -703,10 +699,26 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
       </button>
     </div>
 
-    <div class="sidebar-footer">
+    <!-- <div class="sidebar-footer">
       UJ 319 · Jaboatão dos Guararapes<br>
       Fonte: TCEPE · jun/2026
-    </div>
+    </div> -->
+    <div class="sidebar-footer">
+  UJ 319 · Jaboatão dos Guararapes<br>
+  Fonte: TCEPE · <span id="mesAtual"></span>
+</div>
+
+<script>
+  const agora = new Date();
+
+  const mes = agora.toLocaleString('pt-BR', {
+    month: 'short'
+  }).replace('.', '');
+
+  const ano = agora.getFullYear();
+
+  document.getElementById('mesAtual').textContent = `${mes}/${ano}`;
+</script>
   </aside>
 
   <!-- MAIN -->
@@ -939,7 +951,7 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
               </div>
               <div class="google-sheet-input-row">
                 <input type="text" id="google-sheet-url-input" class="search-input" style="padding-left:12px"
-                       value="https://docs.google.com/spreadsheets/d/e/2PACX-1vS9aR34pdTJfFP4xn6BAMkgbbIfnWVEcbQu5DJ30Np96HtEVn4iQYecNfHAHNuKDrq0z4fZSdGgdGGh/pubhtml"
+                       value="https://docs.google.com/spreadsheets/d/e/2PACX-1vQQjjQnBuJ4IoldcHHSYPxmdWTNLaNm2jTFbAnLBHUjhp1Ha-0uMyzuYLFQzFK5I6RPC1XBsRw-os8h/pubhtml#gid=1743891698"
                        placeholder="https://docs.google.com/spreadsheets/d/....">
                 <button class="btn btn-primary" onclick="connectGoogleSheet()">
                   <i class="ti ti-plug-connected"></i> Conectar
@@ -965,20 +977,11 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
             <div class="toolbar">
               <div class="search-wrap">
                 <i class="ti ti-search"></i>
-                <input class="search-input" type="text" id="search-planilha" placeholder="Buscar por processo, objeto, acórdão..." oninput="renderPlanilhaTable()">
+                <input class="search-input" type="text" id="search-planilha" placeholder="Buscar por processo, objeto, acórdão, determinação/recomendação, prazo ou status..." oninput="renderPlanilhaTable()">
               </div>
               <select class="filter-select" id="filter-status-planilha" onchange="renderPlanilhaTable()">
                 <option value="">Todos os status</option>
               </select>
-              <select class="filter-select" id="filter-tipo-planilha" onchange="renderPlanilhaTable()">
-                <option value="">Determinações e Recomendações</option>
-                <option value="Determinação">Somente Determinações</option>
-                <option value="Recomendação">Somente Recomendações</option>
-              </select>
-            </div>
-            <div class="planilha-missing-warning" id="planilha-missing-cols-warning" style="display:none">
-              <i class="ti ti-alert-triangle"></i>
-              <span></span>
             </div>
             <div class="result-info" id="result-info-planilha"></div>
             <div class="table-wrap">
@@ -1438,7 +1441,7 @@ function openPrazoEditor(uid, proc, currentValue) {
   if (!host) return;
   host.outerHTML = `<div class="prazo-cell prazo-editing" id="prazo-view-${uid}">
     <input type="text" class="prazo-input" id="prazo-input-${uid}"
-      value="${escapeHtml(currentValue)}" placeholder="Ex.: 30 dias, até 15/08"
+      value="${escapeHtml(currentValue)}" placeholder="Ex.: 30 dias"
       maxlength="120" />
     <button type="button" class="prazo-save-btn" title="Salvar" onclick="savePrazoEdit('${uid}')">
       <i class="ti ti-check"></i>
@@ -1565,18 +1568,21 @@ const PLANILHA_CONFIG = {
   // qualquer pessoa que abrir o painel já vê os dados automaticamente,
   // sem precisar colar o link manualmente.
   // Para trocar a planilha oficial, basta editar esta URL.
-  DEFAULT_GOOGLE_SHEET_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS9aR34pdTJfFP4xn6BAMkgbbIfnWVEcbQu5DJ30Np96HtEVn4iQYecNfHAHNuKDrq0z4fZSdGgdGGh/pubhtml',
-  // Campos exibidos no painel, na ordem em que aparecem na tabela.
-  // "aliases" lista os possíveis nomes de coluna aceitos na planilha do
-  // usuário — a busca ignora acentos/maiúsculas, então pequenas variações
-  // de grafia (ex.: "Acordao" em vez de "Acórdão") ainda são reconhecidas.
-  FIELDS: [
-    { key: 'processo', label: 'Processo',                  thStyle: 'width:120px',      aliases: ['Processo', 'Nº do Processo', 'Numero do Processo', 'Nº Processo', 'Processo TCE', 'Nº do Processo TCE'] },
-    { key: 'objeto',   label: 'Objeto',                    thStyle: 'width:230px',      aliases: ['Objeto', 'Objeto do Processo'] },
-    { key: 'acordao',  label: 'Acórdão',                   thStyle: 'width:110px',      aliases: ['Acórdão', 'Acordao', 'Número do Acórdão', 'Numero do Acordao', 'Nº do Acórdão', 'Nº Acórdão'] },
-    { key: 'tipo',     label: 'Determinação/Recomendação', thStyle: 'min-width:300px',  aliases: ['Determinação/Recomendação', 'Determinacao/Recomendacao', 'Determinação ou Recomendação', 'Determinação/ Recomendação', 'Tipo', 'Determinação', 'Recomendação'] },
-    { key: 'prazo',    label: 'Prazo',                     thStyle: 'width:100px',      aliases: ['Prazo', 'Prazo (dias)', 'Prazo para Cumprimento'] },
-    { key: 'status',   label: 'Status',                    thStyle: 'width:130px',      aliases: ['Status', 'Situação', 'Situacao', 'Status de Cumprimento'] },
+  DEFAULT_GOOGLE_SHEET_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQjjQnBuJ4IoldcHHSYPxmdWTNLaNm2jTFbAnLBHUjhp1Ha-0uMyzuYLFQzFK5I6RPC1XBsRw-os8h/pubhtml#gid=1743891698',
+  // Colunas exibidas no painel "Acompanhamento Via Planilha".
+  // O painel mostra APENAS estes campos, na ordem abaixo — mesmo que a
+  // planilha de origem tenha outras colunas, elas são ignoradas aqui.
+  // A busca por nome de coluna ignora acentos/maiúsculas/espaçamento,
+  // então pequenas variações de grafia no arquivo do usuário (ex.:
+  // "Determinação / Recomendação" vs "Determinacao/Recomendacao")
+  // ainda são reconhecidas.
+  COLUNAS: [
+    { key: 'processo', label: 'Processo' },
+    { key: 'objeto', label: 'Objeto' },
+    { key: 'acordao', label: 'Acórdão' },
+    { key: 'detrec', label: 'Determinação/Recomendação' },
+    { key: 'prazo', label: 'Prazo' },
+    { key: 'status', label: 'Status' },
   ],
 };
 
@@ -1585,7 +1591,10 @@ let PLANILHA_STATE = { headers: [], rows: [], filename: null, savedAt: null, sou
 function normalizeHeaderKey(s) {
   return String(s || '')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().trim();
+    .toLowerCase()
+    .replace(/[\/\\_-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function findPlanilhaColumn(headers, targetName) {
@@ -1593,20 +1602,13 @@ function findPlanilhaColumn(headers, targetName) {
   return headers.find(h => normalizeHeaderKey(h) === target) || null;
 }
 
-// Resolve, para a planilha atualmente carregada, qual coluna real
-// corresponde a cada um dos 6 campos que o painel exibe (Processo,
-// Objeto, Acórdão, Determinação/Recomendação, Prazo, Status).
-function resolvePlanilhaColumns(headers) {
-  const map = {};
-  PLANILHA_CONFIG.FIELDS.forEach(f => {
-    let found = null;
-    for (const alias of f.aliases) {
-      found = findPlanilhaColumn(headers, alias);
-      if (found) break;
-    }
-    map[f.key] = found; // null se a planilha não tiver essa coluna
-  });
-  return map;
+// Resolve, para a planilha atualmente carregada, qual coluna real do
+// arquivo corresponde a cada um dos campos fixos exibidos pelo painel.
+function resolvePlanilhaColumns() {
+  return PLANILHA_CONFIG.COLUNAS.map(col => ({
+    ...col,
+    sourceHeader: findPlanilhaColumn(PLANILHA_STATE.headers, col.label),
+  }));
 }
 
 /* ── UPLOAD / PARSE ── */
@@ -1903,92 +1905,69 @@ function stopGoogleSheetAutoRefresh() {
   if (_googleSheetAutoRefreshTimer) { clearInterval(_googleSheetAutoRefreshTimer); _googleSheetAutoRefreshTimer = null; }
 }
 
-/* ── FILTRO: Status (dropdown, populado com os valores encontrados na planilha) ── */
+/* ── FILTRO: Status (dropdown) ──
+   Populado dinamicamente com os valores distintos encontrados na
+   coluna "Status" da planilha carregada. */
 function populatePlanilhaStatusFilter() {
   const sel = document.getElementById('filter-status-planilha');
   const current = sel.value;
   while (sel.options.length > 1) sel.remove(1);
 
-  const cols = resolvePlanilhaColumns(PLANILHA_STATE.headers);
-  if (!cols.status) return;
+  const statusCol = findPlanilhaColumn(PLANILHA_STATE.headers, 'Status');
+  if (!statusCol) return;
 
-  const statuses = [...new Set(PLANILHA_STATE.rows.map(r => String(r[cols.status] ?? '').trim()).filter(Boolean))]
+  const valores = [...new Set(PLANILHA_STATE.rows.map(r => String(r[statusCol] ?? '').trim()).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  statuses.forEach(s => {
-    const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o);
+  valores.forEach(v => {
+    const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o);
   });
-  if (statuses.includes(current)) sel.value = current;
+  if (valores.includes(current)) sel.value = current;
 }
 
-/* ── FILTRAGEM COMBINADA (busca + status + tipo) ── */
+/* ── FILTRAGEM COMBINADA (restrita aos 6 campos exibidos) ── */
 function getFilteredPlanilhaRows() {
   const search = (document.getElementById('search-planilha').value || '').toLowerCase().trim();
-  const cols = resolvePlanilhaColumns(PLANILHA_STATE.headers);
+  const statusCol = findPlanilhaColumn(PLANILHA_STATE.headers, 'Status');
   const statusFilter = document.getElementById('filter-status-planilha').value;
-  const tipoFilter = document.getElementById('filter-tipo-planilha').value;
-  const tipoFilterNorm = normalizeHeaderKey(tipoFilter);
+  const colunas = resolvePlanilhaColumns();
 
   return PLANILHA_STATE.rows.filter(row => {
-    if (statusFilter && cols.status && String(row[cols.status] ?? '').trim() !== statusFilter) return false;
-    if (tipoFilter && cols.tipo && !normalizeHeaderKey(row[cols.tipo]).includes(tipoFilterNorm)) return false;
+    if (statusFilter && statusCol && String(row[statusCol] ?? '').trim() !== statusFilter) return false;
     if (search) {
-      const haystack = PLANILHA_CONFIG.FIELDS
-        .map(f => cols[f.key] ? String(row[cols[f.key]] ?? '') : '')
-        .join(' ').toLowerCase();
+      const haystack = colunas
+        .map(c => c.sourceHeader ? String(row[c.sourceHeader] ?? '') : '')
+        .join(' ')
+        .toLowerCase();
       if (!haystack.includes(search)) return false;
     }
     return true;
   });
 }
 
-/* ── BADGES: Status e Tipo (Determinação/Recomendação) ── */
-function planilhaStatusBadge(raw) {
-  const s = String(raw ?? '').trim();
-  if (!s) return '<span style="color:var(--text-muted)">—</span>';
-  const n = normalizeHeaderKey(s);
-  let cls = 'badge-other', icon = 'ti-point';
-  if (/cumpr|atendid|finaliz|conclu|regulariz|encerrad/.test(n))      { cls = 'badge-fin';   icon = 'ti-check'; }
-  else if (/atrasad|vencid|descumpr|nao\s*atendid/.test(n))            { cls = 'badge-prazo'; icon = 'ti-alert-triangle'; }
-  else if (/andamento|analise|aguard|em\s*curso/.test(n))              { cls = 'badge-jp';    icon = 'ti-clock'; }
-  else if (/pendente/.test(n))                                        { cls = 'badge-tj';    icon = 'ti-hourglass'; }
-  return `<span class="badge ${cls}"><i class="ti ${icon}"></i>${escapeHtml(s)}</span>`;
-}
-
-/* ── RENDER: tabela fixa com os 6 campos de acompanhamento ── */
+/* ── RENDER: tabela com apenas os 6 campos fixos ──
+   Processo · Objeto · Acórdão · Determinação/Recomendação · Prazo · Status
+   Se a planilha carregada não tiver alguma dessas colunas, o campo
+   correspondente aparece vazio (mas a coluna continua sendo exibida). */
 function renderPlanilhaTable() {
-  const cols = resolvePlanilhaColumns(PLANILHA_STATE.headers);
+  const colunas = resolvePlanilhaColumns();
   const filtered = getFilteredPlanilhaRows();
 
   const thead = document.getElementById('thead-planilha');
-  thead.innerHTML = `<tr>${PLANILHA_CONFIG.FIELDS.map(f => `<th${f.thStyle ? ` style="${f.thStyle}"` : ''}>${escapeHtml(f.label)}</th>`).join('')}</tr>`;
+  thead.innerHTML = `<tr>${colunas.map(c => `<th>${escapeHtml(c.label)}</th>`).join('')}</tr>`;
 
   const tbody = document.getElementById('tbody-planilha');
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="${PLANILHA_CONFIG.FIELDS.length}"><div class="empty-state"><i class="ti ti-search-off"></i><p>Nenhum registro encontrado para os filtros aplicados.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${colunas.length || 1}"><div class="empty-state"><i class="ti ti-search-off"></i><p>Nenhum registro encontrado para os filtros aplicados.</p></div></td></tr>`;
   } else {
-    tbody.innerHTML = filtered.map((row, i) => {
-      const cells = PLANILHA_CONFIG.FIELDS.map(f => {
-        const raw = cols[f.key] ? row[cols[f.key]] : '';
-        if (f.key === 'status') return `<td>${planilhaStatusBadge(raw)}</td>`;
-        if (f.key === 'tipo') {
-          const text = String(raw ?? '').trim();
-          if (!text) return `<td><span style="color:var(--text-muted)">—</span></td>`;
-          const uid = `pln-${i}`;
-          return `<td>
-            <div class="content-cell" id="cc-${uid}">${escapeHtml(text)}</div>
-            <div class="content-fade" id="fade-${uid}"></div>
-            <button class="expand-btn" onclick="toggleExpand('${uid}')"><i class="ti ti-chevron-down" style="font-size:12px"></i>ver mais</button>
-          </td>`;
-        }
-        if (f.key === 'prazo') {
-          const v = String(raw ?? '').trim();
-          return `<td>${v ? `<span class="badge badge-prazo"><i class="ti ti-clock"></i>${escapeHtml(v)}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>`;
-        }
-        if (f.key === 'objeto') return `<td style="font-size:12px;color:var(--text-secondary);max-width:420px">${escapeHtml(raw)}</td>`;
-        return `<td style="font-size:12px;color:var(--text-secondary)">${escapeHtml(raw)}</td>`;
-      }).join('');
-      return `<tr>${cells}</tr>`;
-    }).join('');
+    tbody.innerHTML = filtered.map(row =>
+      `<tr>${colunas.map(c => {
+        const val = c.sourceHeader ? row[c.sourceHeader] : '';
+        const isStatus = c.key === 'status';
+        return isStatus
+          ? `<td>${val ? renderPlanilhaStatusBadge(val) : ''}</td>`
+          : `<td style="font-size:12px;color:var(--text-secondary)">${escapeHtml(val)}</td>`;
+      }).join('')}</tr>`
+    ).join('');
   }
 
   const infoEl = document.getElementById('result-info-planilha');
@@ -1998,20 +1977,18 @@ function renderPlanilhaTable() {
     : `Exibindo <strong>${filtered.length}</strong> de <strong>${total}</strong> registros`;
 
   document.getElementById('planilha-count-badge').textContent = `${filtered.length} registros`;
+}
 
-  // Avisa se algum dos 6 campos esperados não foi encontrado na planilha
-  // carregada, para facilitar o diagnóstico de nomes de coluna divergentes.
-  const missing = PLANILHA_CONFIG.FIELDS.filter(f => !cols[f.key]).map(f => f.label);
-  const warnEl = document.getElementById('planilha-missing-cols-warning');
-  if (warnEl) {
-    if (missing.length) {
-      warnEl.style.display = 'flex';
-      warnEl.querySelector('span').textContent =
-        `Colunas não encontradas na planilha: ${missing.join(', ')}. Confira os nomes das colunas no arquivo/planilha.`;
-    } else {
-      warnEl.style.display = 'none';
-    }
-  }
+// Colore o status de forma parecida com os badges já usados no restante
+// do painel (concluído = verde, pendente/atrasado = âmbar/vermelho).
+function renderPlanilhaStatusBadge(rawValue) {
+  const text = String(rawValue).trim();
+  const norm = normalizeHeaderKey(text);
+  let cls = 'badge-status-neutral';
+  if (/conclu|atendid|cumprid|finaliz/.test(norm)) cls = 'badge-status-success';
+  else if (/atrasad|vencid|nao atendid|descumprid/.test(norm)) cls = 'badge-status-danger';
+  else if (/andamento|pendente|prazo|aberto/.test(norm)) cls = 'badge-status-warning';
+  return `<span class="badge ${cls}">${escapeHtml(text)}</span>`;
 }
 
 function escapeHtml(v) {
@@ -2020,20 +1997,16 @@ function escapeHtml(v) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-/* ── EXPORTAR (respeita filtros aplicados; exporta apenas os 6 campos) ── */
+/* ── EXPORTAR (respeita filtros aplicados; só os 6 campos exibidos) ── */
 function exportPlanilha() {
-  const cols = resolvePlanilhaColumns(PLANILHA_STATE.headers);
+  const colunas = resolvePlanilhaColumns();
   const filtered = getFilteredPlanilhaRows();
-
-  const exportRows = filtered.map(row => {
+  const linhas = filtered.map(row => {
     const obj = {};
-    PLANILHA_CONFIG.FIELDS.forEach(f => {
-      obj[f.label] = cols[f.key] ? String(row[cols[f.key]] ?? '') : '';
-    });
+    colunas.forEach(c => { obj[c.label] = c.sourceHeader ? (row[c.sourceHeader] ?? '') : ''; });
     return obj;
   });
-
-  const ws = XLSX.utils.json_to_sheet(exportRows, { header: PLANILHA_CONFIG.FIELDS.map(f => f.label) });
+  const ws = XLSX.utils.json_to_sheet(linhas, { header: colunas.map(c => c.label) });
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Acompanhamento');
   XLSX.writeFile(wb, 'acompanhamento_planilha_319.xlsx');

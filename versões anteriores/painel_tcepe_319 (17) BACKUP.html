@@ -408,10 +408,6 @@ tbody td { padding: 11px 14px; vertical-align: top; }
 .badge-det    { background: #FEE7EF; color: #9D174D; }
 .badge-rec    { background: #DCFCE7; color: #15803D; }
 .badge-prazo  { background: var(--red-bg); color: var(--red); font-weight: 700; }
-.badge-status-success { background: var(--green-bg); color: var(--green); }
-.badge-status-warning { background: var(--amber-bg); color: var(--amber); }
-.badge-status-danger  { background: var(--red-bg); color: var(--red); }
-.badge-status-neutral { background: var(--bg); color: var(--text-secondary); }
 
 /* ── PRAZO EDITÁVEL (TEXTO LIVRE) ── */
 .prazo-cell { display: inline-flex; align-items: center; gap: 6px; }
@@ -961,11 +957,14 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
             <div class="toolbar">
               <div class="search-wrap">
                 <i class="ti ti-search"></i>
-                <input class="search-input" type="text" id="search-planilha" placeholder="Buscar por processo, objeto, acórdão, determinação/recomendação, prazo ou status..." oninput="renderPlanilhaTable()">
+                <input class="search-input" type="text" id="search-planilha" placeholder="Buscar em qualquer campo da planilha..." oninput="renderPlanilhaTable()">
               </div>
-              <select class="filter-select" id="filter-status-planilha" onchange="renderPlanilhaTable()">
-                <option value="">Todos os status</option>
+              <select class="filter-select" id="filter-ano-planilha" onchange="renderPlanilhaTable()">
+                <option value="">Todos os anos de julgamento</option>
               </select>
+              <button class="filter-toggle" id="filter-pi-toggle" onclick="togglePiFilter()">
+                <i class="ti ti-filter"></i> Somente com Nº do PI preenchido
+              </button>
             </div>
             <div class="result-info" id="result-info-planilha"></div>
             <div class="table-wrap">
@@ -1553,46 +1552,25 @@ const PLANILHA_CONFIG = {
   // sem precisar colar o link manualmente.
   // Para trocar a planilha oficial, basta editar esta URL.
   DEFAULT_GOOGLE_SHEET_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQjjQnBuJ4IoldcHHSYPxmdWTNLaNm2jTFbAnLBHUjhp1Ha-0uMyzuYLFQzFK5I6RPC1XBsRw-os8h/pubhtml#gid=1743891698',
-  // Colunas exibidas no painel "Acompanhamento Via Planilha".
-  // O painel mostra APENAS estes campos, na ordem abaixo — mesmo que a
-  // planilha de origem tenha outras colunas, elas são ignoradas aqui.
-  // A busca por nome de coluna ignora acentos/maiúsculas/espaçamento,
-  // então pequenas variações de grafia no arquivo do usuário (ex.:
-  // "Determinação / Recomendação" vs "Determinacao/Recomendacao")
-  // ainda são reconhecidas.
-  COLUNAS: [
-    { key: 'processo', label: 'Processo' },
-    { key: 'objeto', label: 'Objeto' },
-    { key: 'acordao', label: 'Acórdão' },
-    { key: 'detrec', label: 'Determinação/Recomendação' },
-    { key: 'prazo', label: 'Prazo' },
-    { key: 'status', label: 'Status' },
-  ],
+  // Nomes de coluna (como aparecem na planilha) usados pelos filtros.
+  // A busca é feita ignorando acentos/maiúsculas, então pequenas
+  // variações de grafia no arquivo do usuário ainda funcionam.
+  COL_ANO_JULGAMENTO: 'Ano julgamento',
+  COL_NUM_PI: 'Nº do PI',
 };
 
 let PLANILHA_STATE = { headers: [], rows: [], filename: null, savedAt: null, source: null, sourceUrl: null };
+let PLANILHA_PI_FILTER_ACTIVE = false;
 
 function normalizeHeaderKey(s) {
   return String(s || '')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[\/\\_-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+    .toLowerCase().trim();
 }
 
 function findPlanilhaColumn(headers, targetName) {
   const target = normalizeHeaderKey(targetName);
   return headers.find(h => normalizeHeaderKey(h) === target) || null;
-}
-
-// Resolve, para a planilha atualmente carregada, qual coluna real do
-// arquivo corresponde a cada um dos campos fixos exibidos pelo painel.
-function resolvePlanilhaColumns() {
-  return PLANILHA_CONFIG.COLUNAS.map(col => ({
-    ...col,
-    sourceHeader: findPlanilhaColumn(PLANILHA_STATE.headers, col.label),
-  }));
 }
 
 /* ── UPLOAD / PARSE ── */
@@ -1619,6 +1597,7 @@ function handlePlanilhaFile(file) {
         source: 'file',
         sourceUrl: null,
       };
+      PLANILHA_PI_FILTER_ACTIVE = false;
       savePlanilhaToStorage();
       renderPlanilhaPanel();
     } catch (err) {
@@ -1675,6 +1654,7 @@ function clearPlanilha() {
   localStorage.removeItem(PLANILHA_CONFIG.STORAGE_KEY);
   stopGoogleSheetAutoRefresh();
   PLANILHA_STATE = { headers: [], rows: [], filename: null, savedAt: null, source: null, sourceUrl: null };
+  PLANILHA_PI_FILTER_ACTIVE = false;
   renderPlanilhaPanel();
 }
 
@@ -1704,7 +1684,7 @@ function renderPlanilhaPanel() {
     ? new Date(PLANILHA_STATE.savedAt).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
     : '—';
 
-  populatePlanilhaStatusFilter();
+  populatePlanilhaAnoFilter();
   renderPlanilhaTable();
 
   if (isGoogle) startGoogleSheetAutoRefresh();
@@ -1824,6 +1804,7 @@ async function applyGoogleSheetUrl(url, { silent } = {}) {
     source: 'google',
     sourceUrl: url,
   };
+  PLANILHA_PI_FILTER_ACTIVE = false;
   savePlanilhaToStorage();
   renderPlanilhaPanel();
   return true;
@@ -1889,68 +1870,62 @@ function stopGoogleSheetAutoRefresh() {
   if (_googleSheetAutoRefreshTimer) { clearInterval(_googleSheetAutoRefreshTimer); _googleSheetAutoRefreshTimer = null; }
 }
 
-/* ── FILTRO: Status (dropdown) ──
-   Populado dinamicamente com os valores distintos encontrados na
-   coluna "Status" da planilha carregada. */
-function populatePlanilhaStatusFilter() {
-  const sel = document.getElementById('filter-status-planilha');
+/* ── FILTRO: Ano julgamento (dropdown) ── */
+function populatePlanilhaAnoFilter() {
+  const sel = document.getElementById('filter-ano-planilha');
   const current = sel.value;
   while (sel.options.length > 1) sel.remove(1);
 
-  const statusCol = findPlanilhaColumn(PLANILHA_STATE.headers, 'Status');
-  if (!statusCol) return;
+  const anoCol = findPlanilhaColumn(PLANILHA_STATE.headers, PLANILHA_CONFIG.COL_ANO_JULGAMENTO);
+  if (!anoCol) return;
 
-  const valores = [...new Set(PLANILHA_STATE.rows.map(r => String(r[statusCol] ?? '').trim()).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  valores.forEach(v => {
-    const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o);
+  const anos = [...new Set(PLANILHA_STATE.rows.map(r => String(r[anoCol] ?? '').trim()).filter(Boolean))]
+    .sort((a, b) => b.localeCompare(a));
+  anos.forEach(a => {
+    const o = document.createElement('option'); o.value = a; o.textContent = a; sel.appendChild(o);
   });
-  if (valores.includes(current)) sel.value = current;
+  if (anos.includes(current)) sel.value = current;
 }
 
-/* ── FILTRAGEM COMBINADA (restrita aos 6 campos exibidos) ── */
+/* ── FILTRO: Nº do PI preenchido (toggle) ── */
+function togglePiFilter() {
+  PLANILHA_PI_FILTER_ACTIVE = !PLANILHA_PI_FILTER_ACTIVE;
+  document.getElementById('filter-pi-toggle').classList.toggle('active', PLANILHA_PI_FILTER_ACTIVE);
+  renderPlanilhaTable();
+}
+
+/* ── FILTRAGEM COMBINADA ── */
 function getFilteredPlanilhaRows() {
   const search = (document.getElementById('search-planilha').value || '').toLowerCase().trim();
-  const statusCol = findPlanilhaColumn(PLANILHA_STATE.headers, 'Status');
-  const statusFilter = document.getElementById('filter-status-planilha').value;
-  const colunas = resolvePlanilhaColumns();
+  const anoCol = findPlanilhaColumn(PLANILHA_STATE.headers, PLANILHA_CONFIG.COL_ANO_JULGAMENTO);
+  const piCol  = findPlanilhaColumn(PLANILHA_STATE.headers, PLANILHA_CONFIG.COL_NUM_PI);
+  const anoFilter = document.getElementById('filter-ano-planilha').value;
 
   return PLANILHA_STATE.rows.filter(row => {
-    if (statusFilter && statusCol && String(row[statusCol] ?? '').trim() !== statusFilter) return false;
+    if (anoFilter && anoCol && String(row[anoCol] ?? '').trim() !== anoFilter) return false;
+    if (PLANILHA_PI_FILTER_ACTIVE && piCol && !String(row[piCol] ?? '').trim()) return false;
     if (search) {
-      const haystack = colunas
-        .map(c => c.sourceHeader ? String(row[c.sourceHeader] ?? '') : '')
-        .join(' ')
-        .toLowerCase();
+      const haystack = PLANILHA_STATE.headers.map(h => String(row[h] ?? '')).join(' ').toLowerCase();
       if (!haystack.includes(search)) return false;
     }
     return true;
   });
 }
 
-/* ── RENDER: tabela com apenas os 6 campos fixos ──
-   Processo · Objeto · Acórdão · Determinação/Recomendação · Prazo · Status
-   Se a planilha carregada não tiver alguma dessas colunas, o campo
-   correspondente aparece vazio (mas a coluna continua sendo exibida). */
+/* ── RENDER: tabela dinâmica (todas as colunas da planilha) ── */
 function renderPlanilhaTable() {
-  const colunas = resolvePlanilhaColumns();
+  const headers = PLANILHA_STATE.headers;
   const filtered = getFilteredPlanilhaRows();
 
   const thead = document.getElementById('thead-planilha');
-  thead.innerHTML = `<tr>${colunas.map(c => `<th>${escapeHtml(c.label)}</th>`).join('')}</tr>`;
+  thead.innerHTML = `<tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`;
 
   const tbody = document.getElementById('tbody-planilha');
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="${colunas.length || 1}"><div class="empty-state"><i class="ti ti-search-off"></i><p>Nenhum registro encontrado para os filtros aplicados.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${headers.length || 1}"><div class="empty-state"><i class="ti ti-search-off"></i><p>Nenhum registro encontrado para os filtros aplicados.</p></div></td></tr>`;
   } else {
     tbody.innerHTML = filtered.map(row =>
-      `<tr>${colunas.map(c => {
-        const val = c.sourceHeader ? row[c.sourceHeader] : '';
-        const isStatus = c.key === 'status';
-        return isStatus
-          ? `<td>${val ? renderPlanilhaStatusBadge(val) : ''}</td>`
-          : `<td style="font-size:12px;color:var(--text-secondary)">${escapeHtml(val)}</td>`;
-      }).join('')}</tr>`
+      `<tr>${headers.map(h => `<td style="font-size:12px;color:var(--text-secondary)">${escapeHtml(row[h])}</td>`).join('')}</tr>`
     ).join('');
   }
 
@@ -1963,34 +1938,16 @@ function renderPlanilhaTable() {
   document.getElementById('planilha-count-badge').textContent = `${filtered.length} registros`;
 }
 
-// Colore o status de forma parecida com os badges já usados no restante
-// do painel (concluído = verde, pendente/atrasado = âmbar/vermelho).
-function renderPlanilhaStatusBadge(rawValue) {
-  const text = String(rawValue).trim();
-  const norm = normalizeHeaderKey(text);
-  let cls = 'badge-status-neutral';
-  if (/conclu|atendid|cumprid|finaliz/.test(norm)) cls = 'badge-status-success';
-  else if (/atrasad|vencid|nao atendid|descumprid/.test(norm)) cls = 'badge-status-danger';
-  else if (/andamento|pendente|prazo|aberto/.test(norm)) cls = 'badge-status-warning';
-  return `<span class="badge ${cls}">${escapeHtml(text)}</span>`;
-}
-
 function escapeHtml(v) {
   return String(v ?? '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-/* ── EXPORTAR (respeita filtros aplicados; só os 6 campos exibidos) ── */
+/* ── EXPORTAR (respeita filtros aplicados) ── */
 function exportPlanilha() {
-  const colunas = resolvePlanilhaColumns();
   const filtered = getFilteredPlanilhaRows();
-  const linhas = filtered.map(row => {
-    const obj = {};
-    colunas.forEach(c => { obj[c.label] = c.sourceHeader ? (row[c.sourceHeader] ?? '') : ''; });
-    return obj;
-  });
-  const ws = XLSX.utils.json_to_sheet(linhas, { header: colunas.map(c => c.label) });
+  const ws = XLSX.utils.json_to_sheet(filtered, { header: PLANILHA_STATE.headers });
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Acompanhamento');
   XLSX.writeFile(wb, 'acompanhamento_planilha_319.xlsx');

@@ -905,9 +905,6 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
               <button class="btn btn-outline" id="planilha-btn-atualizar" style="display:none" onclick="refreshGoogleSheet()">
                 <i class="ti ti-refresh"></i> Atualizar agora
               </button>
-              <button class="btn btn-outline" id="planilha-btn-alterar-link" style="display:none" onclick="showTrocarGoogleSheetForm()">
-                <i class="ti ti-link"></i> Alterar link
-              </button>
               <button class="btn btn-outline" id="planilha-btn-trocar" style="display:none" onclick="document.getElementById('planilha-file-input-2').click()">
                 <i class="ti ti-replace"></i> Trocar planilha
               </button>
@@ -930,22 +927,13 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
             <div class="planilha-divider"><span>ou</span></div>
 
             <div class="google-sheet-box">
-              <div class="google-sheet-box-title"><i class="ti ti-brand-google-filled"></i> Conectar com Google Sheets</div>
+              <div class="google-sheet-box-title"><i class="ti ti-brand-google-filled"></i> Planilha oficial (Google Sheets)</div>
               <div class="google-sheet-box-sub">
-                Cole o link da planilha do Google Sheets. Ela precisa ter o acesso configurado como
-                "Qualquer pessoa com o link pode visualizar" (Compartilhar → Acesso geral). Se mesmo
-                assim o painel não conseguir ler os dados, publique a planilha na web
-                (Arquivo → Compartilhar → Publicar na Web → CSV) e cole o link gerado.
+                O painel carrega automaticamente a planilha oficial. Se ela não abrir, verifique sua conexão e tente novamente.
               </div>
               <div class="google-sheet-input-row">
-                <input type="text" id="google-sheet-url-input" class="search-input" style="padding-left:12px"
-                       value="https://docs.google.com/spreadsheets/d/e/2PACX-1vS9aR34pdTJfFP4xn6BAMkgbbIfnWVEcbQu5DJ30Np96HtEVn4iQYecNfHAHNuKDrq0z4fZSdGgdGGh/pubhtml"
-                       placeholder="https://docs.google.com/spreadsheets/d/....">
-                <button class="btn btn-primary" onclick="connectGoogleSheet()">
-                  <i class="ti ti-plug-connected"></i> Conectar
-                </button>
-                <button class="btn btn-outline" onclick="useOfficialGoogleSheetLink()" title="Preenche o campo acima com o link da planilha oficial">
-                  <i class="ti ti-link"></i> Usar link oficial
+                <button class="btn btn-primary" onclick="autoConnectDefaultGoogleSheet()">
+                  <i class="ti ti-refresh"></i> Tentar novamente
                 </button>
               </div>
               <div class="google-sheet-error" id="google-sheet-error" style="display:none"></div>
@@ -960,7 +948,7 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
               <span>·</span>
               <span>Carregado em: <strong id="planilha-savedat">—</strong></span>
               <div class="spacer">
-                <button class="btn btn-outline" onclick="clearPlanilha()" title="Remover planilha carregada">
+                <button class="btn btn-outline" id="planilha-btn-remover" onclick="clearPlanilha()" title="Remover planilha carregada">
                   <i class="ti ti-trash"></i> Remover
                 </button>
               </div>
@@ -1706,7 +1694,7 @@ function renderPlanilhaPanel() {
 
   const isGoogle = hasData && PLANILHA_STATE.source === 'google';
   document.getElementById('planilha-btn-atualizar').style.display = isGoogle ? 'inline-flex' : 'none';
-  document.getElementById('planilha-btn-alterar-link').style.display = isGoogle ? 'inline-flex' : 'none';
+  document.getElementById('planilha-btn-remover').style.display = isGoogle ? 'none' : 'inline-flex';
   document.getElementById('planilha-btn-trocar').style.display = (hasData && !isGoogle) ? 'inline-flex' : 'none';
   document.getElementById('planilha-google-status').style.display = isGoogle ? 'inline-flex' : 'none';
   if (isGoogle) {
@@ -1846,58 +1834,28 @@ async function applyGoogleSheetUrl(url, { silent } = {}) {
   return true;
 }
 
-async function connectGoogleSheet() {
-  const input = document.getElementById('google-sheet-url-input');
-  const url = input.value.trim();
-  showGoogleSheetError(null);
-  if (!url) { showGoogleSheetError('Cole o link da planilha antes de conectar.'); return; }
-
-  try {
-    await applyGoogleSheetUrl(url);
-  } catch (err) {
-    showGoogleSheetError(err.message);
-    console.error('[SisFisc][Planilha][GoogleSheets]', err);
-  }
-}
-
-// Preenche o campo de link com a planilha oficial (PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL),
-// sem conectar automaticamente — o usuário confirma clicando em "Conectar".
-function useOfficialGoogleSheetLink() {
-  const input = document.getElementById('google-sheet-url-input');
-  input.value = PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL;
-  showGoogleSheetError(null);
-  input.focus();
-}
-
-// Conecta automaticamente na planilha oficial (PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL)
-// assim que o painel é carregado, sem exigir que o usuário cole o link.
+// Conecta na planilha oficial (PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL). O link é fixo
+// no código: não há campo para trocá-lo e nada salvo no navegador o sobrepõe.
 async function autoConnectDefaultGoogleSheet() {
   const url = PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL;
-  if (!url) return;
-  document.getElementById('google-sheet-url-input').value = url;
+  showGoogleSheetError(null);
   try {
     await applyGoogleSheetUrl(url, { silent: true });
   } catch (err) {
-    // Falhou a conexão automática (ex: planilha ficou privada) — deixa a
-    // tela de upload/link visível para o usuário resolver manualmente.
     console.error('[SisFisc][Planilha][GoogleSheets] Falha na conexão automática:', err);
-    showGoogleSheetError('Não foi possível carregar a planilha oficial automaticamente: ' + err.message);
+    // Sem rede/planilha indisponível: usa a última cópia da planilha oficial, se houver.
+    if (PLANILHA_STATE.rows && PLANILHA_STATE.rows.length && PLANILHA_STATE.sourceUrl === url) {
+      renderPlanilhaPanel();
+      return;
+    }
+    showGoogleSheetError('Não foi possível carregar a planilha oficial: ' + err.message);
   }
 }
 
-// Permite trocar o link de uma planilha Google já conectada
-function showTrocarGoogleSheetForm() {
-  document.getElementById('planilha-content-container').style.display = 'none';
-  document.getElementById('planilha-upload-container').style.display = 'block';
-  document.getElementById('google-sheet-url-input').value = PLANILHA_STATE.sourceUrl || '';
-  showGoogleSheetError(null);
-}
-
 async function refreshGoogleSheet(silent) {
-  if (!PLANILHA_STATE.sourceUrl) return;
   try {
-    const { headers, rows } = await fetchGoogleSheetRows(PLANILHA_STATE.sourceUrl);
-    PLANILHA_STATE = { ...PLANILHA_STATE, headers, rows, savedAt: new Date().toISOString() };
+    const { headers, rows } = await fetchGoogleSheetRows(PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL);
+    PLANILHA_STATE = { ...PLANILHA_STATE, sourceUrl: PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL, headers, rows, savedAt: new Date().toISOString() };
     savePlanilhaToStorage();
     renderPlanilhaPanel();
   } catch (err) {
@@ -2149,14 +2107,11 @@ initFontSize();
 loadData();
 setInterval(() => loadData(), AUTO_REFRESH_MS);
 
-// Restaura a última planilha trabalhada, se existir; caso contrário,
-// conecta automaticamente na planilha oficial do Google Sheets.
-if (loadPlanilhaFromStorage() && PLANILHA_STATE.rows && PLANILHA_STATE.rows.length) {
-  renderPlanilhaPanel();
-} else {
-  document.getElementById('nb-planilha').textContent = '—';
-  autoConnectDefaultGoogleSheet();
-}
+// Sempre busca a planilha oficial ao abrir. A cópia salva no navegador só é
+// usada como reserva (offline) e só se veio do link oficial atual.
+document.getElementById('nb-planilha').textContent = '—';
+loadPlanilhaFromStorage();
+autoConnectDefaultGoogleSheet();
 </script>
 </body>
 </html>

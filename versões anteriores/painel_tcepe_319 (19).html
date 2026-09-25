@@ -539,8 +539,8 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
 }
 .google-sheet-box-title i { color: var(--accent); font-size: 18px; }
 .google-sheet-box-sub { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
-.google-sheet-input-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.google-sheet-input-row input { flex: 1; min-width: 220px; }
+.google-sheet-input-row { display: flex; gap: 8px; }
+.google-sheet-input-row input { flex: 1; }
 .google-sheet-error {
   margin-top: 10px; font-size: 12px; color: var(--red);
   background: var(--red-bg); border-radius: 6px; padding: 8px 10px; line-height: 1.5;
@@ -943,9 +943,6 @@ tbody tr:hover .content-fade { background: linear-gradient(transparent, #F7F9FC)
                        placeholder="https://docs.google.com/spreadsheets/d/....">
                 <button class="btn btn-primary" onclick="connectGoogleSheet()">
                   <i class="ti ti-plug-connected"></i> Conectar
-                </button>
-                <button class="btn btn-outline" onclick="useOfficialGoogleSheetLink()" title="Preenche o campo acima com o link da planilha oficial">
-                  <i class="ti ti-link"></i> Usar link oficial
                 </button>
               </div>
               <div class="google-sheet-error" id="google-sheet-error" style="display:none"></div>
@@ -1858,15 +1855,6 @@ async function connectGoogleSheet() {
     showGoogleSheetError(err.message);
     console.error('[SisFisc][Planilha][GoogleSheets]', err);
   }
-}
-
-// Preenche o campo de link com a planilha oficial (PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL),
-// sem conectar automaticamente — o usuário confirma clicando em "Conectar".
-function useOfficialGoogleSheetLink() {
-  const input = document.getElementById('google-sheet-url-input');
-  input.value = PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL;
-  showGoogleSheetError(null);
-  input.focus();
 }
 
 // Conecta automaticamente na planilha oficial (PLANILHA_CONFIG.DEFAULT_GOOGLE_SHEET_URL)
